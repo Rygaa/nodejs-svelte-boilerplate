@@ -1,5 +1,5 @@
 import { pgTable, text, timestamp, pgEnum } from "drizzle-orm/pg-core";
-import { createId } from "@paralleldrive/cuid2";
+import { v4 as uuidv4 } from "uuid";
 
 // Define the UserRole enum
 export const userRoleEnum = pgEnum("UserRole", ["USER", "ADMIN", "ROOT"]);
@@ -8,7 +8,7 @@ export const userRoleEnum = pgEnum("UserRole", ["USER", "ADMIN", "ROOT"]);
 export const users = pgTable("users", {
   id: text("id")
     .primaryKey()
-    .$defaultFn(() => createId()),
+    .$defaultFn(() => uuidv4()),
   email: text("email").notNull().unique(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
