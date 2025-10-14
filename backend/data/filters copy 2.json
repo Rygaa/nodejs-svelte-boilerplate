@@ -1,0 +1,47 @@
+{
+  "countries": [
+    {
+      "name": "CA",
+      "code": "Canada",
+      "cities": [
+        "Montreal",
+        "Quebec City",
+        "Sherbrooke",
+        "Saguenay",
+        "Laval",
+        "Longueuil",
+        "Trois-Rivières"
+      ]
+    }
+  ],
+  "headcounts": [
+    "1-10",
+    "11-50",
+    "51-200"
+  ],
+  "company_types": [
+    "educational",
+    "educational institution",
+    "government agency",
+    "non profit",
+    "partnership",
+    "privately held",
+    "public company",
+    "self employed",
+    "self owned",
+    "sole proprietorship"
+  ],
+  "keywords": [
+    "technology",
+    "software",
+    "healthcare",
+    "medical",
+    "finance",
+    "banking",
+    "education",
+    "learning",
+    "consulting",
+    "services"
+  ],
+  "industries": []
+}

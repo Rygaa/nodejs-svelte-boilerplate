@@ -1,63 +1,119 @@
 {
   "countries": [
     {
-      "name": "United States",
-      "code": "US",
-      "cities": [
-        "New York",
-        "San Francisco",
-        "Los Angeles",
-        "Chicago",
-        "Austin"
-      ]
-    },
-    {
       "name": "Canada",
       "code": "CA",
-      "cities": [
-        "Toronto",
-        "Vancouver",
-        "Montreal",
-        "Calgary",
-        "Ottawa"
+      "states": [
+        {
+          "name": "Quebec",
+          "cities": [
+            "Montreal",
+            "Quebec City",
+            "Sherbrooke",
+            "Saguenay",
+            "Laval",
+            "Longueuil",
+            "Trois-Rivières",
+            "Gatineau",
+            "Chomedy",
+            "Blainville",
+            "Terrebonne",
+            "Repentigny",
+            "Saint-Jérôme",
+            "Saint-Hyacinthe",
+            "Granby",
+            "Rimouski",
+            "Drummondville",
+            "Saint-Jean-sur-Richelieu",
+            "Victoriaville",
+            "Salaberry-de-Valleyfield",
+            "Sorel-Tracy",
+            "Beloeil",
+            "Saint-Eustache",
+            "Pointe-Claire",
+            "Dollard-des-Ormeaux",
+            "Candiac",
+            "L'Assomption",
+            "L'Île-Perrot",
+            "Sainte-Thérèse",
+            "Sainte-Julie",
+            "Boisbriand",
+            "Saint-Bruno-de-Montarville",
+            "Brossard",
+            "Saint-Sauveur",
+            "Lachute",
+            "Saint-Lambert",
+            "Sainte-Anne-des-Plaines",
+            "Saint-Amable",
+            "Saint-Georges",
+            "La Prairie",
+            "Mont-Saint-Hilaire",
+            "Richelieu",
+            "Saint-Constant",
+            "Saint-Hippolyte",
+            "Saint-Joseph-du-Lac",
+            "Mirabel",
+            "Rivière-du-Loup"
+          ]
+        },
+        {
+          "name": "Ontario",
+          "cities": [
+            "Toronto",
+            "Ottawa",
+            "Mississauga",
+            "Brampton",
+            "Hamilton",
+            "London",
+            "Markham",
+            "Vaughan",
+            "Kitchener",
+            "Windsor",
+            "Richmond Hill",
+            "Oakville",
+            "Burlington",
+            "Greater Sudbury",
+            "Oshawa",
+            "Barrie",
+            "St. Catharines",
+            "Cambridge",
+            "Whitby",
+            "Guelph",
+            "Thunder Bay",
+            "Waterloo",
+            "Brantford",
+            "Niagara Falls",
+            "Peterborough",
+            "Sarnia",
+            "Chatham-Kent",
+            "Clarington",
+            "Milton",
+            "Newmarket",
+            "Belleville",
+            "North Bay",
+            "Orillia",
+            "Timmins"
+          ]
+        }
       ]
     }
   ],
   "headcounts": [
     "1-10",
     "11-50",
-    "51-200",
-    "201-500",
-    "501-1000",
-    "1001-5000",
-    "5001+"
+    "51-200"
   ],
-  "company_types": [
-    "privately held",
-    "public company",
-    "partnership",
-    "non-profit"
+  "keywords": [
+    "technology",
+    "software",
+    "healthcare",
+    "medical",
+    "finance",
+    "banking",
+    "education",
+    "learning",
+    "consulting",
+    "services"
   ],
-  "keyword_buckets": [
-    [
-      "technology",
-      "software"
-    ],
-    [
-      "healthcare",
-      "medical"
-    ],
-    [
-      "finance",
-      "banking"
-    ],
-    [
-      "education",
-      "learning"
-    ],
-    [
-      "consulting",
-      "services"
-    ]
-  ]
+  "industries": []
 }

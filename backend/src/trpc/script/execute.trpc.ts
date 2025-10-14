@@ -6,6 +6,7 @@ import { users } from "../../db/schema";
 import { eq } from "drizzle-orm";
 import { catchErrors } from "../../utils/catchErrors";
 import path from "path";
+import { db } from "../../db";
 
 // Input schema for running a script
 const RunScriptInputSchema = z.object({
@@ -17,9 +18,8 @@ const RunScriptInputSchema = z.object({
 export const execute = protectedProcedure.input(RunScriptInputSchema).mutation(async ({ ctx, input }) => {
   const { scriptName, params = {} } = input;
 
-  return await catchErrors(async (globalTx) => {
-    // Only ROOT users can run scripts
-    const [user] = await globalTx.select().from(users).where(eq(users.id, ctx.user!.userId));
+  if (scriptName === "discoverCompanies") {
+    const [user] = await db.select().from(users).where(eq(users.id, ctx.user!.userId));
 
     if (!user || user.role !== "ROOT") {
       throw new TRPCError({
@@ -40,7 +40,7 @@ export const execute = protectedProcedure.input(RunScriptInputSchema).mutation(a
 
     // Execute and measure runtime
     const startTime = Date.now();
-    const result = await scriptFn(globalTx, params);
+    const result = await scriptFn(db, params);
     const endTime = Date.now();
 
     return {
@@ -51,7 +51,43 @@ export const execute = protectedProcedure.input(RunScriptInputSchema).mutation(a
       error: null,
       success: true,
     };
-  }, 300000); // 5-minute timeout
+  } else {
+    return await catchErrors(async (globalTx) => {
+      // Only ROOT users can run scripts
+      const [user] = await globalTx.select().from(users).where(eq(users.id, ctx.user!.userId));
+
+      if (!user || user.role !== "ROOT") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only ROOT users can execute scripts",
+        });
+      }
+      // Load all available scripts dynamically
+      const scripts = await loadScriptFunctions();
+
+      const scriptFn = scripts[scriptName];
+      if (!scriptFn) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Script '${scriptName}' not found in /scripts`,
+        });
+      }
+
+      // Execute and measure runtime
+      const startTime = Date.now();
+      const result = await scriptFn(globalTx, params);
+      const endTime = Date.now();
+
+      return {
+        message: "Script executed successfully",
+        scriptName,
+        executionTime: endTime - startTime,
+        output: result ? JSON.stringify(result) : "Function executed successfully",
+        error: null,
+        success: true,
+      };
+    }, 300000); // 5-minute timeout
+  }
 });
 
 async function loadScriptFunctions() {

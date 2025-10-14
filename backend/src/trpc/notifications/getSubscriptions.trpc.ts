@@ -1,10 +1,10 @@
-import { protectedProcedure } from "../../index";
+import { protectedProcedure, z } from "../../index";
 import { users } from "../../db/schema";
 import { ne, sql } from "drizzle-orm";
 import { catchErrors } from "../../utils/catchErrors";
 
 // Get all subscriptions (for debugging)
-export const getSubscriptions = protectedProcedure.query(async ({ ctx }) => {
+export const getSubscriptions = protectedProcedure.input(z.object({})).query(async ({ ctx }) => {
   return await catchErrors(async (globalTx) => {
     const usersWithSubscriptions = await globalTx
       .select({
