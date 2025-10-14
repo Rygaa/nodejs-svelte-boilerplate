@@ -28,28 +28,39 @@
 
   const baseNavigationItems = [
     {
+      name: "Stats",
+      path: "/dashboard/stats",
+      icon: "analytics",
+    },
+    {
       name: "Companies",
       path: "/dashboard/companies",
-      icon: "🏢",
+      icon: "database",
     },
     {
       name: "Context",
       path: "/dashboard/context",
-      icon: "�",
+      icon: "price_tag",
     },
   ];
 
   const rootOnlyItems = [
     {
+      name: "Filters",
+      path: "/dashboard/filters",
+      icon: "filter",
+      requiredRole: "ROOT",
+    },
+    {
       name: "Scripts",
       path: "/dashboard/scripts",
-      icon: "📜",
+      icon: "script",
       requiredRole: "ROOT",
     },
     {
       name: "User Management",
       path: "/dashboard/users",
-      icon: "👥",
+      icon: "group",
       requiredRole: "ROOT",
     },
   ];
@@ -58,7 +69,12 @@
     {
       name: "My Account",
       path: "/dashboard/account",
-      icon: "👤",
+      icon: "user",
+    },
+    {
+      name: "Email Settings",
+      path: "/dashboard/email",
+      icon: "email",
     },
   ];
 
@@ -104,7 +120,7 @@
         on:click={() => navigateTo(item.path)}
         active={isActive(item.path)}
         variant="default"
-        icon={item.icon}
+        iconname={item.icon}
         text={item.name}
       />
     {/each}
@@ -115,15 +131,17 @@
         <div class="pb-2">
           <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Administration</h3>
         </div>
-        {#each rootOnlyItems as item}
-          <SidebarButton
-            on:click={() => navigateTo(item.path)}
-            active={isActive(item.path)}
-            variant="admin"
-            icon={item.icon}
-            text={item.name}
-          />
-        {/each}
+        <div class="space-y-2">
+          {#each rootOnlyItems as item}
+            <SidebarButton
+              on:click={() => navigateTo(item.path)}
+              active={isActive(item.path)}
+              variant="admin"
+              iconname={item.icon}
+              text={item.name}
+            />
+          {/each}
+        </div>
       </div>
     {/if}
 
@@ -132,20 +150,22 @@
       <div class="pb-2">
         <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Account</h3>
       </div>
-      {#each accountItems as item}
-        <SidebarButton
-          on:click={() => navigateTo(item.path)}
-          active={isActive(item.path)}
-          variant="default"
-          icon={item.icon}
-          text={item.name}
-        />
-      {/each}
+      <div class="space-y-2">
+        {#each accountItems as item}
+          <SidebarButton
+            on:click={() => navigateTo(item.path)}
+            active={isActive(item.path)}
+            variant="default"
+            iconname={item.icon}
+            text={item.name}
+          />
+        {/each}
+      </div>
     </div>
   </nav>
 
   <!-- Logout Button -->
   <div class="px-4 py-4 border-t border-gray-200">
-    <SidebarButton on:click={handleLogout} variant="danger" icon="🚪" text="Logout" />
+    <SidebarButton on:click={handleLogout} variant="danger" iconname="logout" text="Logout" />
   </div>
 </div>

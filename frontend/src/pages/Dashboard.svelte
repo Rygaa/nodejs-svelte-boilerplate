@@ -11,16 +11,26 @@
   import RealTimeConsole from "../lib/components/Logger.svelte";
   import SocketTester from "../lib/components/SocketTester.svelte";
   import Scripts from "./Scripts.svelte";
+  import Companies from "./Companies/Companies.svelte";
+  import Context from "./Context.svelte";
+  import Filters from "./Filters.svelte";
+  import Stats from "./Stats.svelte";
+  import ProtonMail from "./ProtonMail.svelte";
 
   let user: any = null;
   let isLoading = true;
-  let showSocketTester = true; // Changed to true for always visible
+  let showSocketTester = false; // Changed to true for always visible
 
   // Define dashboard routes
   const dashboardRoutes = {
     "/dashboard": MyAccount, // Default to My Account
     "/dashboard/account": MyAccount,
     "/dashboard/scripts": Scripts,
+    "/dashboard/companies": Companies,
+    "/dashboard/context": Context,
+    "/dashboard/filters": Filters,
+    "/dashboard/stats": Stats,
+    "/dashboard/email": ProtonMail,
   };
 
   onMount(() => {
@@ -38,7 +48,7 @@
       }
 
       try {
-        const userData = await trpc.auth.me.query();
+        const userData = await trpc.auth.me.query({});
         user = userData;
         // Update the auth store with the complete user data
         authStore.setUser(userData);
@@ -69,7 +79,7 @@
   <!-- Socket Tester Toggle Button -->
   <button
     on:click={() => (showSocketTester = !showSocketTester)}
-    class="fixed bottom-4 right-4 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg z-50 transition-colors"
+    class="fixed bottom-4 right-20 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg z-50 transition-colors"
     title={showSocketTester ? "Hide Socket Tester" : "Show Socket Tester"}
   >
     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

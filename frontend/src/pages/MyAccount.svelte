@@ -5,6 +5,9 @@
   import Input from "../lib/components/Input.svelte";
   import Button from "../lib/components/Button.svelte";
   import PushNotificationComplete from "../lib/components/PushNotificationComplete.svelte";
+  import IconExamples from "@/lib/components/IconExamples.svelte";
+  import ButtonExamples from "@/lib/components/ButtonExamples.svelte";
+  import DataGridExample from "./DataGridExample.svelte";
 
   let user: any = null;
   let isLoading = true;
@@ -22,7 +25,7 @@
     const unsubscribe = authStore.subscribe(async (auth) => {
       if (auth.isAuthenticated && auth.token) {
         try {
-          const userData = await trpc.auth.me.query();
+          const userData = await trpc.auth.me.query({});
           user = userData;
 
           // Pre-fill form fields
@@ -57,7 +60,7 @@
       success = "Profile updated successfully!";
 
       // Refresh user data
-      const userData = await trpc.auth.me.query();
+      const userData = await trpc.auth.me.query({});
       user = userData;
     } catch (err: any) {
       error = err?.message || "Failed to update profile";
@@ -72,6 +75,10 @@
     <h1 class="text-2xl font-bold text-gray-900 mb-2">My Account</h1>
     <p class="text-gray-600">Manage your account settings and profile information.</p>
   </div>
+
+  <!-- <IconExamples />
+  <ButtonExamples /> -->
+  <DataGridExample />
 
   {#if isLoading}
     <div class="animate-pulse space-y-6">

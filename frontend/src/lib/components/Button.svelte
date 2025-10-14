@@ -1,6 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
   import { fade } from "svelte/transition";
+  import Icon from "./Icon.svelte";
 
   // Props
   export let text: string = "";
@@ -17,6 +18,7 @@
   export let iconOnly: boolean = false;
   export let ripple: boolean = true;
   export let tooltip: string = "";
+  export let icon: string = ""; // New icon prop
 
   // Icon props
   export let iconLeft: boolean = false;
@@ -109,6 +111,26 @@
     lg: "w-6 h-6",
     xl: "w-7 h-7",
   };
+
+  // Icon component props based on button variant and size
+  const iconColorMap: Record<typeof variant, string> = {
+    primary: "white",
+    secondary: "white",
+    outline: "text",
+    ghost: "text",
+    danger: "white",
+    success: "white",
+  };
+
+  const iconSizeMap: Record<typeof size, "xs" | "sm" | "md" | "lg" | "xl"> = {
+    xs: "xs",
+    sm: "xs",
+    md: "sm",
+    lg: "md",
+    xl: "lg",
+  }; // Get icon color and size based on button props
+  $: iconColor = iconColorMap[variant];
+  $: iconSize = iconSizeMap[size];
 </script>
 
 <!-- Wrapper for tooltip and full width -->
@@ -135,24 +157,32 @@
       {/if}
 
       <span class:opacity-0={loading} class="inline-flex items-center gap-2">
-        {#if $$slots.iconLeft || iconLeft}
-          <span class={iconSizes[size]}>
-            <slot name="iconLeft" />
-          </span>
-        {/if}
-
-        {#if !iconOnly}
-          {#if text}
-            {text}
-          {:else}
-            <slot />
+        {#if iconOnly && icon}
+          <Icon iconname={icon} color={iconColor} size={iconSize} />
+        {:else}
+          {#if $$slots.iconLeft || iconLeft}
+            <span class={iconSizes[size]}>
+              <slot name="iconLeft" />
+            </span>
+          {:else if icon && !iconRight}
+            <Icon iconname={icon} color={iconColor} size={iconSize} />
           {/if}
-        {/if}
 
-        {#if $$slots.iconRight || iconRight}
-          <span class={iconSizes[size]}>
-            <slot name="iconRight" />
-          </span>
+          {#if !iconOnly}
+            {#if text}
+              {text}
+            {:else}
+              <slot />
+            {/if}
+          {/if}
+
+          {#if $$slots.iconRight || iconRight}
+            <span class={iconSizes[size]}>
+              <slot name="iconRight" />
+            </span>
+          {:else if icon && iconRight}
+            <Icon iconname={icon} color={iconColor} size={iconSize} />
+          {/if}
         {/if}
       </span>
 
@@ -205,24 +235,32 @@
       {/if}
 
       <span class:opacity-0={loading} class="inline-flex items-center gap-2">
-        {#if $$slots.iconLeft || iconLeft}
-          <span class={iconSizes[size]}>
-            <slot name="iconLeft" />
-          </span>
-        {/if}
-
-        {#if !iconOnly}
-          {#if text}
-            {text}
-          {:else}
-            <slot />
+        {#if iconOnly && icon}
+          <Icon iconname={icon} color={iconColor} size={iconSize} />
+        {:else}
+          {#if $$slots.iconLeft || iconLeft}
+            <span class={iconSizes[size]}>
+              <slot name="iconLeft" />
+            </span>
+          {:else if icon && !iconRight}
+            <Icon iconname={icon} color={iconColor} size={iconSize} />
           {/if}
-        {/if}
 
-        {#if $$slots.iconRight || iconRight}
-          <span class={iconSizes[size]}>
-            <slot name="iconRight" />
-          </span>
+          {#if !iconOnly}
+            {#if text}
+              {text}
+            {:else}
+              <slot />
+            {/if}
+          {/if}
+
+          {#if $$slots.iconRight || iconRight}
+            <span class={iconSizes[size]}>
+              <slot name="iconRight" />
+            </span>
+          {:else if icon && iconRight}
+            <Icon iconname={icon} color={iconColor} size={iconSize} />
+          {/if}
         {/if}
       </span>
 

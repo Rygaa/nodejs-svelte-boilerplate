@@ -4,16 +4,6 @@
   import Modal from "./Modal.svelte";
   import Button from "./Button.svelte";
 
-  // Type definitions
-  interface ColumnAction<T> {
-    label: string;
-    onClick?: (item: T) => void;
-    className?: string;
-    title?: string;
-    href?: (item: T) => string;
-    external?: boolean;
-  }
-
   // Component props with defaults
   type T = $$Generic<Record<string, any>>;
 
@@ -30,7 +20,6 @@
   export let showColumnToggle: boolean = true;
   export let excludeColumns: (keyof T)[] = ["id"] as (keyof T)[];
   export let columnLabels: Record<keyof T, string> = {} as Record<keyof T, string>;
-  export let actions: ColumnAction<T>[] = [];
   export let onRowClick: ((item: T) => void) | undefined = undefined;
   export let className: string = "";
   export let maxHeight: string | number | undefined = undefined;
@@ -40,6 +29,7 @@
   export let selectedItem: T | null = null;
   export let visibleColumns: string[] | undefined = undefined;
   export let onVisibleColumnsChange: ((columns: string[]) => void) | undefined = undefined;
+  export let storageKey: string = ""; // LocalStorage key for persisting column visibility
 
   // Server-side pagination props
   export let serverSidePagination: boolean = false;
@@ -72,7 +62,31 @@
   let jsonModalTitle = "";
 
   // Debounced search
-  let searchTimeout: number;
+  let searchTimeout: ReturnType<typeof setTimeout>;
+
+  // LocalStorage functions
+  function saveVisibleColumnsToStorage(columns: string[]) {
+    if (storageKey && typeof localStorage !== "undefined") {
+      try {
+        localStorage.setItem(`datagrid_columns_${storageKey}`, JSON.stringify(columns));
+      } catch (e) {
+        console.warn("Failed to save visible columns to localStorage:", e);
+      }
+    }
+  }
+
+  function loadVisibleColumnsFromStorage(): string[] | null {
+    if (storageKey && typeof localStorage !== "undefined") {
+      try {
+        const saved = localStorage.getItem(`datagrid_columns_${storageKey}`);
+        return saved ? JSON.parse(saved) : null;
+      } catch (e) {
+        console.warn("Failed to load visible columns from localStorage:", e);
+        return null;
+      }
+    }
+    return null;
+  }
 
   // Computed: available columns
   $: availableColumns =
@@ -80,23 +94,27 @@
 
   // Initialize visible columns
   $: if (availableColumns.length > 0 && isInitializing) {
-    if (visibleColumns && visibleColumns.length > 0) {
-      visibleColumnsState = availableColumns.reduce(
-        (acc, key) => {
-          acc[key] = visibleColumns.includes(key);
-          return acc;
-        },
-        {} as Record<string, boolean>
-      );
+    // Priority: localStorage > visibleColumns prop > all columns visible
+    const savedColumns = loadVisibleColumnsFromStorage();
+    let columnsToShow: string[] = [];
+
+    if (savedColumns && savedColumns.length > 0) {
+      // Use saved columns, but filter to only include available columns
+      columnsToShow = savedColumns.filter((col) => availableColumns.includes(col));
+    } else if (visibleColumns && visibleColumns.length > 0) {
+      columnsToShow = visibleColumns;
     } else {
-      visibleColumnsState = availableColumns.reduce(
-        (acc, key) => {
-          acc[key] = true;
-          return acc;
-        },
-        {} as Record<string, boolean>
-      );
+      columnsToShow = availableColumns;
     }
+
+    visibleColumnsState = availableColumns.reduce(
+      (acc, key) => {
+        acc[key] = columnsToShow.includes(key);
+        return acc;
+      },
+      {} as Record<string, boolean>
+    );
+
     isInitializing = false;
   }
 
@@ -178,24 +196,6 @@
 
   // Computed: visible columns list
   $: visibleColumnsList = availableColumns.filter((key) => visibleColumnsState[key]);
-
-  // Computed: enhanced actions
-  $: enhancedActions = (() => {
-    const actionsArray = [...actions];
-
-    if (showDetailsModal !== undefined && onCloseDetails) {
-      const detailsAction: ColumnAction<T> = {
-        label: "📋 Details",
-        onClick: onRowClick,
-        className:
-          "bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium transition-colors",
-        title: "View Details",
-      };
-      actionsArray.unshift(detailsAction);
-    }
-
-    return actionsArray;
-  })();
 
   // Computed: has active filters
   $: hasActiveFilters =
@@ -407,9 +407,16 @@
       [key]: checked,
     };
 
-    if (!isInitializing && onVisibleColumnsChange) {
+    if (!isInitializing) {
       const visible = availableColumns.filter((col) => visibleColumnsState[col]);
-      onVisibleColumnsChange(visible);
+
+      // Save to localStorage
+      saveVisibleColumnsToStorage(visible);
+
+      // Call the callback if provided
+      if (onVisibleColumnsChange) {
+        onVisibleColumnsChange(visible);
+      }
     }
   }
 
@@ -421,6 +428,14 @@
       },
       {} as Record<string, boolean>
     );
+
+    // Save to localStorage
+    saveVisibleColumnsToStorage(availableColumns);
+
+    // Call the callback if provided
+    if (onVisibleColumnsChange) {
+      onVisibleColumnsChange(availableColumns);
+    }
   }
 
   function hideAllColumns() {
@@ -432,6 +447,15 @@
       },
       {} as Record<string, boolean>
     );
+
+    // Save to localStorage
+    const visible = [firstKey];
+    saveVisibleColumnsToStorage(visible);
+
+    // Call the callback if provided
+    if (onVisibleColumnsChange) {
+      onVisibleColumnsChange(visible);
+    }
   }
 
   // Lifecycle
@@ -488,6 +512,13 @@
         <!-- Sticky Table Header -->
         <thead class="bg-gray-50 sticky top-0 z-10">
           <tr>
+            {#if $$slots.actions}
+              <th
+                class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50"
+              >
+                Actions
+              </th>
+            {/if}
             {#each visibleColumnsList as key}
               <th
                 class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative bg-gray-50"
@@ -634,13 +665,6 @@
                 </div>
               </th>
             {/each}
-            {#if enhancedActions.length > 0}
-              <th
-                class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50"
-              >
-                Actions
-              </th>
-            {/if}
           </tr>
         </thead>
 
@@ -649,7 +673,7 @@
           {#if currentItems.length === 0}
             <tr>
               <td
-                colspan={visibleColumnsList.length + (enhancedActions.length > 0 ? 1 : 0)}
+                colspan={visibleColumnsList.length + ($$slots.actions ? 1 : 0)}
                 class="px-6 py-12 text-center text-gray-500"
               >
                 {emptyMessage}
@@ -661,8 +685,18 @@
                 class="hover:bg-gray-50 {onRowClick ? 'cursor-pointer' : ''}"
                 on:click={() => onRowClick?.(item)}
               >
+                {#if $$slots.actions}
+                  <td class="px-4 py-2">
+                    <div class="flex space-x-4">
+                      <!-- Custom actions slot - pass the current item -->
+                      <slot name="actions" {item} />
+                    </div>
+                  </td>
+                {/if}
                 {#each visibleColumnsList as key}
-                  <td class="px-4 py-2 text-sm text-gray-900">
+                  <td
+                    class="px-4 py-2 text-sm text-gray-900 max-w-xs truncate whitespace-nowrap overflow-hidden"
+                  >
                     {#if isDisplayableObject(item[key])}
                       <Button
                         variant="primary"
@@ -678,41 +712,12 @@
                         }}
                       />
                     {:else}
-                      {defaultFormatCell(key, item[key])}
+                      <span class="block truncate" title={defaultFormatCell(key, item[key])}>
+                        {defaultFormatCell(key, item[key])}
+                      </span>
                     {/if}
                   </td>
                 {/each}
-                {#if enhancedActions.length > 0}
-                  <td class="px-4 py-2">
-                    <div class="flex space-x-2">
-                      {#each enhancedActions as action}
-                        {#if action.href}
-                          <a
-                            href={action.href(item)}
-                            target={action.external ? "_blank" : undefined}
-                            rel={action.external ? "noopener noreferrer" : undefined}
-                            class={action.className ||
-                              "bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium transition-colors"}
-                            title={action.title}
-                          >
-                            {action.label}
-                          </a>
-                        {:else}
-                          <Button
-                            variant="primary"
-                            size="xs"
-                            text={action.label}
-                            tooltip={action.title}
-                            on:click={(e) => {
-                              e.stopPropagation();
-                              action.onClick?.(item);
-                            }}
-                          />
-                        {/if}
-                      {/each}
-                    </div>
-                  </td>
-                {/if}
               </tr>
             {/each}
           {/if}

@@ -4,6 +4,7 @@
   import Button from "./Button.svelte";
 
   interface LogEntry {
+    id?: string; // Unique identifier for the log entry
     timestamp: string;
     level: string;
     message: string;
@@ -28,6 +29,7 @@
   let logContainer: HTMLElement;
   let logLevel = "INFO"; // Filter level
   let expandedLogs = new Set(); // Track which logs are expanded
+  let isUserScrolledUp = false; // Track if user manually scrolled up
 
   const logLevels = ["DEBUG", "INFO", "PROCESS", "API", "DATA", "SUCCESS", "WARNING", "ERROR"];
 
@@ -93,6 +95,11 @@
   });
 
   function addLog(logEntry: LogEntry) {
+    // Add unique ID if not provided
+    if (!logEntry.id) {
+      logEntry.id = `log-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    }
+
     // Add to "All" tab
     const allTab = logTabs.find((tab) => tab.id === "all");
     if (allTab) {
@@ -135,8 +142,8 @@
 
     logTabs = [...logTabs]; // Trigger reactivity
 
-    // Auto-scroll to bottom if enabled and viewing the relevant tab
-    if (autoScroll && logContainer) {
+    // Auto-scroll to bottom only if enabled AND user hasn't scrolled up
+    if (autoScroll && !isUserScrolledUp && logContainer) {
       setTimeout(() => {
         logContainer.scrollTop = logContainer.scrollHeight;
       }, 10);
@@ -218,10 +225,11 @@
       logTabs = [...logTabs];
     }
 
-    // Auto-scroll to bottom when switching tabs
+    // Auto-scroll to bottom when switching tabs (always scroll on tab switch)
     if (autoScroll && logContainer) {
       setTimeout(() => {
         logContainer.scrollTop = logContainer.scrollHeight;
+        isUserScrolledUp = false; // Reset scroll state when switching tabs
       }, 10);
     }
   }
@@ -239,6 +247,29 @@
 
   function toggleAutoScroll() {
     autoScroll = !autoScroll;
+  }
+
+  function isScrolledToBottom(element: HTMLElement): boolean {
+    const threshold = 50; // Allow 50px threshold for "bottom"
+    return element.scrollTop >= element.scrollHeight - element.clientHeight - threshold;
+  }
+
+  function handleScroll() {
+    if (logContainer) {
+      isUserScrolledUp = !isScrolledToBottom(logContainer);
+      // If user scrolled to bottom manually, re-enable auto-scroll
+      if (!isUserScrolledUp && !autoScroll) {
+        autoScroll = true;
+      }
+    }
+  }
+
+  function scrollToBottom() {
+    if (logContainer) {
+      logContainer.scrollTop = logContainer.scrollHeight;
+      isUserScrolledUp = false;
+      autoScroll = true;
+    }
   }
 
   function toggleLogExpanded(logId: string) {
@@ -291,7 +322,7 @@
   <div class="fixed bottom-0 right-4 left-4 z-40 p-4 pointer-events-none">
     <!-- Console Panel -->
     <div
-      class="bg-gray-900 border border-gray-700 rounded-lg shadow-2xl w-full max-w-4xl h-96 flex flex-col ml-auto pointer-events-auto"
+      class="bg-gray-900 border border-gray-700 rounded-lg shadow-2xl w-full max-w-4xl h-96 flex flex-col ml-auto pointer-events-auto relative"
     >
       <!-- Header -->
       <div class="flex items-center justify-between p-3 border-b border-gray-700">
@@ -312,10 +343,10 @@
 
         <div class="flex items-center space-x-2">
           <Button
-            variant={autoScroll ? "primary" : "secondary"}
+            variant={autoScroll && !isUserScrolledUp ? "primary" : "secondary"}
             size="xs"
-            text="Auto-scroll"
-            tooltip="Toggle auto-scroll"
+            text={autoScroll && !isUserScrolledUp ? "Auto-scroll ON" : "Auto-scroll OFF"}
+            tooltip="Toggle auto-scroll behavior"
             on:click={toggleAutoScroll}
           />
           <Button
@@ -392,9 +423,10 @@
       <div
         bind:this={logContainer}
         class="flex-1 overflow-y-auto p-3 bg-black text-green-400 font-mono text-sm"
+        on:scroll={handleScroll}
       >
         {#each filteredLogs as log, index}
-          {@const logId = `${log.timestamp}-${index}`}
+          {@const logId = log.id || `${log.timestamp}-${index}`}
           <div class="flex items-start space-x-2 mb-1 hover:bg-gray-900 px-1 rounded">
             <span class="flex-shrink-0 text-lg">{log.icon}</span>
             <span class="flex-shrink-0 text-gray-500 w-20"
@@ -437,6 +469,28 @@
           <div class="text-gray-500 text-center py-8">No logs to display. Waiting for real-time logs...</div>
         {/if}
       </div>
+
+      <!-- Scroll to Bottom Button -->
+      {#if isUserScrolledUp}
+        <div class="absolute bottom-16 right-4 z-10">
+          <Button
+            variant="primary"
+            size="sm"
+            text="Scroll to Bottom"
+            tooltip="Scroll to bottom and resume auto-scroll"
+            on:click={scrollToBottom}
+          >
+            <svg slot="iconLeft" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width={2}
+                d="M19 14l-7 7m0 0l-7-7m7 7V3"
+              />
+            </svg>
+          </Button>
+        </div>
+      {/if}
 
       <!-- Footer -->
       <div class="flex items-center justify-between p-2 border-t border-gray-700 text-xs text-gray-400">
