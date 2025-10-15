@@ -13,7 +13,6 @@
   import Scripts from "./Scripts.svelte";
   import Companies from "./Companies/Companies.svelte";
   import Context from "./Context.svelte";
-  import Filters from "./Filters.svelte";
   import Stats from "./Stats.svelte";
   import ProtonMail from "./ProtonMail.svelte";
 
@@ -28,7 +27,6 @@
     "/dashboard/scripts": Scripts,
     "/dashboard/companies": Companies,
     "/dashboard/context": Context,
-    "/dashboard/filters": Filters,
     "/dashboard/stats": Stats,
     "/dashboard/email": ProtonMail,
   };

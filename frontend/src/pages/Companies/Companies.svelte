@@ -11,11 +11,14 @@
   let error = "";
   let companies: any[] = [];
   let generatingEmails: Set<string> = new Set(); // Track which companies are generating emails
+  let findingEmails: Set<string> = new Set(); // Track which companies are finding emails
   let selectedCompany: any = null; // For viewing personalization details
   let showPersonalizationModal: boolean = false;
   let showEmailModal: boolean = false;
   let companyEmails: any[] = []; // Store company emails for the selected company
+  let companyContactEmails: any[] = []; // Store company contact emails for the selected company
   let loadingEmails: boolean = false;
+  let loadingContactEmails: boolean = false;
   let filterValues: Record<string, string[]> = {}; // Store filter values for DataGrid
   let loadingFilterValues = false;
 
@@ -120,6 +123,7 @@
 
     // Load company emails
     await loadCompanyEmails(company.id);
+    await loadCompanyContactEmails(company.id);
   }
 
   async function loadCompanyEmails(companyId: string) {
@@ -136,10 +140,25 @@
     }
   }
 
+  async function loadCompanyContactEmails(companyId: string) {
+    try {
+      loadingContactEmails = true;
+      const result = await trpc.company.getContactEmails.query({
+        companyId: companyId,
+      });
+      companyContactEmails = result.emails || [];
+    } catch (err: any) {
+      companyContactEmails = [];
+    } finally {
+      loadingContactEmails = false;
+    }
+  }
+
   function closePersonalizationModal() {
     showPersonalizationModal = false;
     selectedCompany = null;
     companyEmails = [];
+    companyContactEmails = [];
   }
 
   function openEmailModal(company: any) {
@@ -155,6 +174,37 @@
   function onSearch(searchTerm: string, filters: Record<string, string[]>) {
     // Reset to first page when search/filters change
     loadCompanies(1, searchTerm, filters);
+  }
+
+  async function findEmailsForCompany(company: any) {
+    if (!company.domain) {
+      error = "Company domain is required to find emails";
+      return;
+    }
+
+    try {
+      findingEmails.add(company.id);
+      findingEmails = findingEmails; // Trigger reactivity
+
+      const result = await trpc.company.findEmails.mutate({
+        domain: company.domain,
+      });
+
+      if (result.success) {
+        console.log(`Found ${result.data.emails.length} emails for ${company.domain}:`, result.data);
+
+        // You can show a success message or modal with the emails
+        alert(
+          `Found ${result.data.emails.length} emails for ${company.domain}!\nCheck the console for details.`
+        );
+      }
+    } catch (err: any) {
+      console.error("Error finding emails:", err);
+      error = err?.message || "Failed to find emails";
+    } finally {
+      findingEmails.delete(company.id);
+      findingEmails = findingEmails; // Trigger reactivity
+    }
   }
 
   onMount(() => {
@@ -214,7 +264,7 @@
       <Icon
         size="sm"
         iconname="more_1"
-        tooltip="Generate AI-powered email for this company"
+        tooltip="View company details and personalization"
         on:click={(e) => {
           e.stopPropagation();
           viewDetails(item);
@@ -229,6 +279,16 @@
           openEmailModal(item);
         }}
       />
+      <Icon
+        size="sm"
+        iconname="pencil"
+        tooltip="Find emails from Hunter.io for this company domain"
+        loading={findingEmails.has(item.id)}
+        on:click={(e) => {
+          e.stopPropagation();
+          findEmailsForCompany(item);
+        }}
+      />
     </svelte:fragment>
   </DataGrid>
 </AvailableHeightContainer>
@@ -239,6 +299,8 @@
   {selectedCompany}
   {companyEmails}
   {loadingEmails}
+  {companyContactEmails}
+  {loadingContactEmails}
   onClose={closePersonalizationModal}
 />
 

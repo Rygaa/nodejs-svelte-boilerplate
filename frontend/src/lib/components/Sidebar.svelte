@@ -46,12 +46,6 @@
 
   const rootOnlyItems = [
     {
-      name: "Filters",
-      path: "/dashboard/filters",
-      icon: "filter",
-      requiredRole: "ROOT",
-    },
-    {
       name: "Scripts",
       path: "/dashboard/scripts",
       icon: "script",
