@@ -1,134 +1,43 @@
 import { db } from "../db";
-import { filters, companies, filterCombinations, combinationFilterItems } from "../db/schema";
-import { eq, inArray } from "drizzle-orm";
+import { companies, hunterIOFilters } from "../db/schema";
+import { eq, sql } from "drizzle-orm";
 import { hunterRequest } from "../services/hunter.service";
-import type { Database } from "../db";
-import { generateBasicCombinations, InputFilters } from "../utils/generateBasicCombinations";
 import { logger } from "../services/logger.service";
 import { catchErrors } from "../utils/catchErrors";
-
-/**
- * Filter out used combinations and return only unused ones
- */
-export async function getUnusedCombinations(
-  client: Database,
-  filtersToSave: Array<{ combination: any; filterIds: string[] }>
-): Promise<any[]> {
-  if (filtersToSave.length === 0) return [];
-
-  const allFilterIds = [...new Set(filtersToSave.flatMap((f) => f.filterIds))];
-
-  const existingCombinations = await client
-    .select({
-      combinationId: filterCombinations.id,
-      filterId: combinationFilterItems.filterId,
-    })
-    .from(filterCombinations)
-    .innerJoin(combinationFilterItems, eq(filterCombinations.id, combinationFilterItems.filterCombinationId))
-    .where(inArray(combinationFilterItems.filterId, allFilterIds));
-
-  const existingMap = new Map<string, Set<string>>();
-  for (const row of existingCombinations) {
-    if (!existingMap.has(row.combinationId)) {
-      existingMap.set(row.combinationId, new Set());
-    }
-    existingMap.get(row.combinationId)!.add(row.filterId);
-  }
-
-  const arr: any[] = [];
-  for (const { combination, filterIds, ...args } of filtersToSave) {
-    const filterIdSet = new Set(filterIds);
-
-    const hasExistingMatch = Array.from(existingMap.values()).some(
-      (existingFilters) =>
-        existingFilters.size === filterIdSet.size && [...filterIdSet].every((id) => existingFilters.has(id))
-    );
-
-    if (!hasExistingMatch) {
-      arr.push({ combination, filterIds, ...args });
-    }
-  }
-
-  return arr;
-}
 
 export async function discoverCompanies(
   params: { maxCombinations?: number; delayBetweenRequests?: number } = {}
 ): Promise<void> {
-  const { maxCombinations = 10_000, delayBetweenRequests = 200 } = params;
-  const allFilters = await db.select().from(filters);
-  if (allFilters.length === 0) {
-    console.log("❌ No filters found in database");
+  const { delayBetweenRequests = 200 } = params;
+
+  // get all isUsed = false hunterIOFilters
+  const filters = await db.select().from(hunterIOFilters).where(eq(hunterIOFilters.isUsed, false));
+  if (filters.length === 0) {
+    console.log("No unused filters found. Exiting.");
     return;
   }
 
-  // --- Build InputFilters structure (fully typed) ---
-  const inputFilters: InputFilters = {
-    headcounts: allFilters.filter((f) => f.type === "headcount").map((f) => f.value),
-    keywords: allFilters.filter((f) => f.type === "keyword").map((f) => f.value),
-    industries: allFilters.filter((f) => f.type === "industry").map((f) => f.value),
-
-    countries: (() => {
-      const countryFilters = allFilters.filter((f) => f.type === "country");
-      const stateFilters = allFilters.filter((f) => f.type === "state");
-      const cityFilters = allFilters.filter((f) => f.type === "city");
-
-      return countryFilters.map((country) => ({
-        country: country.value,
-        states: stateFilters
-          .filter((state) => state.bucketName === country.value)
-          .map((state) => ({
-            state: state.value,
-            cities: cityFilters.filter((city) => city.details === state.value).map((city) => city.value),
-          })),
-      }));
-    })(),
-  };
-
-  const combinations = await generateBasicCombinations(inputFilters, {
-    maxCombo: maxCombinations,
-    ignoreNullVariations: true,
-  });
-  console.log(combinations[0]);
-  const combinationsToProcess = await getUnusedCombinations(db, combinations);
-
-  throw new Error("STOP - Script disabled temporarily");
-
-  console.log(`Unused combinations: ${combinationsToProcess.length}`);
-  if (combinationsToProcess.length === 0) {
-    console.log("No new combinations to process");
-    return;
-  }
+  console.log(`Found ${filters.length} unused filters.`);
 
   // Process combinations
-  await combinationsToProcess.slice(0, 50).asyncMap(
-    async ({ filterIds, combination, country, state, city, headcount, companyType }, index) =>
+  await filters.slice(0, 50).asyncMap(
+    async (filter, index) =>
       await catchErrors(async (globalTx) => {
-        if (filterIds.length === 0) return;
+        await new Promise((resolve) => setTimeout(resolve, delayBetweenRequests));
 
-        const combinationName = `Discovery Combo ${index + 1} - ${new Date().toISOString()}`;
+        const { country, state, city, headcount, companyType } = filter.meta as any;
 
-        const [newCombination] = await globalTx
-          .insert(filterCombinations)
-          .values({ name: combinationName })
-          .returning({ id: filterCombinations.id });
-
-        if (filterIds.length > 0) {
-          await globalTx.insert(combinationFilterItems).values(
-            filterIds.map((filterId: string) => ({
-              filterId,
-              filterCombinationId: newCombination.id,
-            }))
-          );
-        }
-
-        await new Promise((r) => setTimeout(r, delayBetweenRequests));
+        // find hungerFilterIo by value and update isUsed to true using JSON comparison
+        await globalTx
+          .update(hunterIOFilters)
+          .set({ isUsed: true })
+          .where(sql`${hunterIOFilters.value}::text = ${JSON.stringify(filter.value)}`);
 
         let newCompanies = 0;
         try {
           const hunterRes = await hunterRequest("/v2/discover", {
             method: "POST",
-            body: combination,
+            body: filter.value,
           });
 
           const companiesData: any[] = hunterRes?.data || [];
@@ -159,24 +68,17 @@ export async function discoverCompanies(
             }
           }
 
-          console.log(
-            `Processed combination ${index + 1}: ${newCompanies} new companies added found ${
-              companiesData.length
-            }`
-          );
           logger.success({
             message: `Processed combination ${index + 1}: ${newCompanies} new companies added (found ${
               companiesData.length
             })`,
             source: "discoverCompaniesScript",
-            data: combination,
           });
         } catch (error) {
-          console.log(`Error processing combination ${index + 1}:`);
           logger.error({
             message: `Error processing combination ${index + 1}`,
             source: "discoverCompaniesScript",
-            data: { error: error instanceof Error ? error.message : "Unknown error", combination },
+            data: { error: error instanceof Error ? error.message : "Unknown error" },
           });
         }
       })

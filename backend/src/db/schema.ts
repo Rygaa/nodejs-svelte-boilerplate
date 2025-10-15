@@ -1,4 +1,14 @@
-import { pgTable, text, timestamp, pgEnum, integer, boolean, uniqueIndex } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  pgEnum,
+  integer,
+  boolean,
+  uniqueIndex,
+  json,
+  decimal,
+} from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
@@ -79,40 +89,6 @@ export const emailsCounts = pgTable(
   (table) => [uniqueIndex("emails_counts_company_id_key").on(table.companyId)]
 );
 
-// Filters table for the discovery system
-export const filters = pgTable("filters", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => uuidv4()),
-  type: text("type").notNull(), // "country", "city", "headcount", "company_type", "keyword"
-  value: text("value").notNull(),
-  details: text("details"), // Additional info like country code or state
-  bucketName: text("bucket_name"), // For grouping (e.g., country for cities, bucket name for keywords)
-  createdAt: timestamp("createdAt").notNull().defaultNow(),
-  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
-});
-
-// Filter combinations table
-export const filterCombinations = pgTable("filter_combinations", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => uuidv4()),
-  name: text("name").notNull(),
-  createdAt: timestamp("createdAt").notNull().defaultNow(),
-  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
-});
-
-// Junction table for filter combinations and individual filters
-export const combinationFilterItems = pgTable("combination_filter_items", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => uuidv4()),
-  filterId: text("filter_id").notNull(),
-  filterCombinationId: text("filter_combination_id").notNull(),
-  createdAt: timestamp("createdAt").notNull().defaultNow(),
-  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
-});
-
 // Context table for email templates and AI context
 export const contexts = pgTable("contexts", {
   id: text("id")
@@ -148,6 +124,43 @@ export const protonMailConfigs = pgTable(
   (table) => [uniqueIndex("protonmail_configs_user_id_key").on(table.userId)]
 );
 
+// Hunter.io filters table
+export const hunterIOFilters = pgTable("hunter_io_filters", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv4()),
+  value: json("value").notNull(),
+  meta: json("meta"),
+  isUsed: boolean("is_used").default(false).notNull(),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+// Company contact emails table (for storing actual email addresses from various sources)
+export const companyContactEmails = pgTable(
+  "company_contact_emails",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => uuidv4()),
+    companyId: text("company_id").notNull(),
+    email: text("email").notNull(), // email address
+    type: text("type"), // personal, generic, etc.
+    confidence: decimal("confidence", { precision: 5, scale: 2 }), // confidence score from source
+    firstName: text("first_name"),
+    lastName: text("last_name"),
+    position: text("position"),
+    linkedin: text("linkedin"),
+    twitter: text("twitter"),
+    phoneNumber: text("phone_number"),
+    verification: boolean("verification").default(false).notNull(),
+    meta: json("meta"), // store the whole response as JSON
+    createdAt: timestamp("createdAt").notNull().defaultNow(),
+    updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex("company_contact_emails_company_email_key").on(table.companyId, table.email)]
+);
+
 // Export types
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -157,13 +170,11 @@ export type CompanyEmail = typeof companyEmails.$inferSelect;
 export type NewCompanyEmail = typeof companyEmails.$inferInsert;
 export type EmailsCount = typeof emailsCounts.$inferSelect;
 export type NewEmailsCount = typeof emailsCounts.$inferInsert;
-export type Filter = typeof filters.$inferSelect;
-export type NewFilter = typeof filters.$inferInsert;
-export type FilterCombination = typeof filterCombinations.$inferSelect;
-export type NewFilterCombination = typeof filterCombinations.$inferInsert;
-export type CombinationFilterItem = typeof combinationFilterItems.$inferSelect;
-export type NewCombinationFilterItem = typeof combinationFilterItems.$inferInsert;
 export type Context = typeof contexts.$inferSelect;
 export type NewContext = typeof contexts.$inferInsert;
 export type ProtonMailConfig = typeof protonMailConfigs.$inferSelect;
 export type NewProtonMailConfig = typeof protonMailConfigs.$inferInsert;
+export type HunterIOFilter = typeof hunterIOFilters.$inferSelect;
+export type NewHunterIOFilter = typeof hunterIOFilters.$inferInsert;
+export type CompanyContactEmail = typeof companyContactEmails.$inferSelect;
+export type NewCompanyContactEmail = typeof companyContactEmails.$inferInsert;

@@ -29,6 +29,41 @@
       "when": 1760424081986,
       "tag": "0003_remove_province",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1760458297543,
+      "tag": "0004_update_filters_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1760460991847,
+      "tag": "0005_replace_filters_with_hunter_io_filters",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1760463480831,
+      "tag": "0006_update_hunter_io_filters_to_json",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1760468988117,
+      "tag": "0007_bumpy_susan_delgado",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1760497197088,
+      "tag": "0008_cuddly_lenny_balinger",
+      "breakpoints": true
     }
   ]
 }

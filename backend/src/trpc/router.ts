@@ -22,6 +22,8 @@ import { listCompanies, getCompanyStats } from "../trpc/company/list.trpc";
 import { getFilterValues } from "../trpc/company/filterValues.trpc";
 import { checkHunterHealth } from "../trpc/company/health.trpc";
 import { getFromHunterIo } from "../trpc/company/getFromHunterIo.trpc";
+import { findEmails } from "../trpc/company/findEmails.trpc";
+import { getCompanyContactEmails } from "../trpc/company/getContactEmails.trpc";
 import { listContexts } from "../trpc/context/list.trpc";
 import { getContext } from "../trpc/context/get.trpc";
 import { createContext } from "../trpc/context/create.trpc";
@@ -29,7 +31,6 @@ import { updateContext } from "../trpc/context/update.trpc";
 import { deleteContext } from "../trpc/context/delete.trpc";
 import { generateEmail } from "../trpc/companyEmail/generate.trpc";
 import { getCompanyEmails } from "../trpc/companyEmail/list.trpc";
-import { getFilters } from "../trpc/filter/list.trpc";
 import { getProtonConfig } from "../trpc/email/getProtonConfig.trpc";
 import { saveProtonConfig } from "../trpc/email/saveProtonConfig.trpc";
 import { testConnection } from "../trpc/email/testConnection.trpc";
@@ -62,6 +63,8 @@ export const appRouter = router({
     getFilterValues,
     checkHunterHealth,
     getFromHunterIo,
+    findEmails,
+    getContactEmails: getCompanyContactEmails,
   }),
   context: router({
     list: listContexts,
@@ -73,9 +76,6 @@ export const appRouter = router({
   companyEmail: router({
     generate: generateEmail,
     list: getCompanyEmails,
-  }),
-  filter: router({
-    getFilters: getFilters,
   }),
   email: router({
     getProtonConfig,

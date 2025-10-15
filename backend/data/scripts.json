@@ -1,49 +1,21 @@
 {
   "scripts": [
     {
-      "name": "calculateCombinations",
-      "filename": "calculateCombinations.ts",
-      "description": "Calculate total possible filter combinations",
-      "autoRun": false,
-      "waitTime": 3600000,
-      "enabled": true,
-      "lastRun": null,
-      "nextRun": null,
-      "runCount": 0,
-      "params": {
-        "maxCombinations": 1000000,
-        "showSample": false,
-        "sampleSize": 5
-      }
-    },
-    {
       "name": "discoverCompanies",
       "filename": "discoverCompanies.ts",
       "description": "Discover companies using Hunter.io API",
-      "autoRun": false,
+      "autoRun": true,
       "waitTime": 60000,
       "enabled": true,
-      "lastRun": "2025-10-14T15:03:01.375Z",
-      "nextRun": null,
-      "runCount": 1406,
+      "lastRun": "2025-10-15T06:34:12.251Z",
+      "nextRun": "2025-10-15T06:35:12.285Z",
+      "runCount": 2014,
       "params": {
         "maxCombinations": 1000000,
         "delayBetweenRequests": 200,
         "requestsPerSecond": 5,
         "requestsPerMinute": 50
       }
-    },
-    {
-      "name": "generateFilters",
-      "filename": "generateFilters.ts",
-      "description": "Generate filters from JSON configuration",
-      "autoRun": false,
-      "waitTime": 86400000,
-      "enabled": true,
-      "lastRun": null,
-      "nextRun": null,
-      "runCount": 0,
-      "params": {}
     },
     {
       "name": "deleteCompanies",
@@ -58,47 +30,11 @@
       "params": {}
     },
     {
-      "name": "deleteCombinations",
+      "name": "deleteHunterIOFilters",
       "filename": "deleteCombinations.ts",
-      "description": "Delete filter combinations from database",
+      "description": "Delete Hunter.io filter combinations from database",
       "autoRun": false,
       "waitTime": 86400000,
-      "enabled": true,
-      "lastRun": null,
-      "nextRun": null,
-      "runCount": 0,
-      "params": {}
-    },
-    {
-      "name": "deleteAllFilters",
-      "filename": "deleteAllFilters.ts",
-      "description": "Auto-discovered script: deleteAllFilters",
-      "autoRun": false,
-      "waitTime": 3600000,
-      "enabled": true,
-      "lastRun": null,
-      "nextRun": null,
-      "runCount": 0,
-      "params": {}
-    },
-    {
-      "name": "deleteCompaniesAndCombinations",
-      "filename": "deleteCompaniesAndCombinations.ts",
-      "description": "Auto-discovered script: deleteCompaniesAndCombinations",
-      "autoRun": false,
-      "waitTime": 3600000,
-      "enabled": true,
-      "lastRun": null,
-      "nextRun": null,
-      "runCount": 0,
-      "params": {}
-    },
-    {
-      "name": "discoverCompanies2",
-      "filename": "discoverCompanies2.ts",
-      "description": "Auto-discovered script: discoverCompanies2",
-      "autoRun": false,
-      "waitTime": 3600000,
       "enabled": true,
       "lastRun": null,
       "nextRun": null,
@@ -118,33 +54,33 @@
       "params": {}
     },
     {
-      "name": "updateCompaniesProvince",
-      "filename": "updateCompaniesProvince.ts",
-      "description": "Auto-discovered script: updateCompaniesProvince",
-      "autoRun": false,
-      "waitTime": 3600000,
-      "enabled": true,
-      "lastRun": null,
-      "nextRun": null,
-      "runCount": 0,
-      "params": {}
-    },
-    {
-      "name": "deleteRecentData",
-      "filename": "deleteRecentData.ts",
-      "description": "Auto-discovered script: deleteRecentData",
-      "autoRun": false,
-      "waitTime": 3600000,
-      "enabled": true,
-      "lastRun": null,
-      "nextRun": null,
-      "runCount": 0,
-      "params": {}
-    },
-    {
       "name": "standardizeTimezoneToUTC",
       "filename": "standardizeTimezoneToUTC.ts",
       "description": "Auto-discovered script: standardizeTimezoneToUTC",
+      "autoRun": false,
+      "waitTime": 3600000,
+      "enabled": true,
+      "lastRun": null,
+      "nextRun": null,
+      "runCount": 0,
+      "params": {}
+    },
+    {
+      "name": "generateHunterIOFilters",
+      "filename": "generateHunterIOFilters.ts",
+      "description": "Auto-discovered script: generateHunterIOFilters",
+      "autoRun": false,
+      "waitTime": 3600000,
+      "enabled": true,
+      "lastRun": null,
+      "nextRun": null,
+      "runCount": 0,
+      "params": {}
+    },
+    {
+      "name": "deleteCombinations",
+      "filename": "deleteCombinations.ts",
+      "description": "Auto-discovered script: deleteCombinations",
       "autoRun": false,
       "waitTime": 3600000,
       "enabled": true,

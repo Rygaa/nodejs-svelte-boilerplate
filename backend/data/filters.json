@@ -55,45 +55,6 @@
             "Mirabel",
             "Rivière-du-Loup"
           ]
-        },
-        {
-          "name": "Ontario",
-          "cities": [
-            "Toronto",
-            "Ottawa",
-            "Mississauga",
-            "Brampton",
-            "Hamilton",
-            "London",
-            "Markham",
-            "Vaughan",
-            "Kitchener",
-            "Windsor",
-            "Richmond Hill",
-            "Oakville",
-            "Burlington",
-            "Greater Sudbury",
-            "Oshawa",
-            "Barrie",
-            "St. Catharines",
-            "Cambridge",
-            "Whitby",
-            "Guelph",
-            "Thunder Bay",
-            "Waterloo",
-            "Brantford",
-            "Niagara Falls",
-            "Peterborough",
-            "Sarnia",
-            "Chatham-Kent",
-            "Clarington",
-            "Milton",
-            "Newmarket",
-            "Belleville",
-            "North Bay",
-            "Orillia",
-            "Timmins"
-          ]
         }
       ]
     }

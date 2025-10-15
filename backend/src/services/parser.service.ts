@@ -1,4 +1,7 @@
 /* ---------------------- Fetch helpers ---------------------- */
+import path from "path";
+import { generateBasicCombinations, InputFilters } from "../utils/generateBasicCombinations";
+import * as fs from "fs";
 
 function ensureFetch() {
   if (globalThis.fetch) return globalThis.fetch;
@@ -116,4 +119,44 @@ export async function fetchSiteSnapshotMulti(domain: string): Promise<any> {
     }
   }
   return { ok: false, pages: [], error: "Could not fetch site" };
+}
+
+interface FilterData {
+  countries: Array<{
+    name: string;
+    code: string;
+    states: Array<{
+      name: string;
+      cities: string[];
+    }>;
+  }>;
+  headcounts: string[];
+  keywords: string[];
+  industries: string[];
+}
+
+export async function parseFiltersJsonFile(): Promise<any> {
+  // Read input filters from filter.json file
+  const filtersPath = path.join(__dirname, "../../data/filters.json");
+
+  if (!fs.existsSync(filtersPath)) {
+    throw new Error(`Filter file not found at: ${filtersPath}`);
+  }
+
+  const filterData: FilterData = JSON.parse(fs.readFileSync(filtersPath, "utf8"));
+
+  // Transform the filter data to match our InputFilters interface
+  const inputFilters: InputFilters = {
+    headcounts: filterData.headcounts,
+    keywords: filterData.keywords,
+    industries: filterData.industries,
+    countries: filterData.countries.map((country) => ({
+      country: country.code,
+      states: country.states.map((state) => ({
+        state: state.name,
+        cities: state.cities,
+      })),
+    })),
+  };
+  return inputFilters;
 }

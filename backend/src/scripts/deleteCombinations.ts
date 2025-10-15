@@ -1,46 +1,37 @@
 import { db } from "../db";
-import { combinationFilterItems, filterCombinations } from "../db/schema";
+import { hunterIOFilters } from "../db/schema";
 import { sql } from "drizzle-orm";
 import type { Database } from "../db";
 
-export async function deleteCombinations(tx: Database | null = null) {
+export async function deleteHunterIOFilters(tx: Database | null = null) {
   const client = tx || db;
 
   // Count existing records before deletion
-  const [{ combinationFilterItemCount }] = await client
-    .select({ combinationFilterItemCount: sql<number>`count(*)` })
-    .from(combinationFilterItems);
-  const [{ filterCombinationCount }] = await client
-    .select({ filterCombinationCount: sql<number>`count(*)` })
-    .from(filterCombinations);
+  const [{ hunterIOFilterCount }] = await client
+    .select({ hunterIOFilterCount: sql<number>`count(*)` })
+    .from(hunterIOFilters);
 
-  const totalCount = Number(combinationFilterItemCount) + Number(filterCombinationCount);
+  const totalCount = Number(hunterIOFilterCount);
 
   if (totalCount === 0) {
     return {
       success: true,
-      deletedCombinationItems: 0,
-      deletedCombinations: 0,
+      deletedFilters: 0,
       totalDeleted: 0,
     };
   }
 
-  // Get counts before deletion for return values
-  const combinationItemsCount = Number(combinationFilterItemCount);
-  const combinationsCount = Number(filterCombinationCount);
+  // Get count before deletion for return value
+  const filtersCount = Number(hunterIOFilterCount);
 
-  // Delete in proper order (child tables first)
-  await client.delete(combinationFilterItems);
-  await client.delete(filterCombinations);
-
-  const totalDeleted = combinationItemsCount + combinationsCount;
+  // Delete all Hunter.io filters
+  await client.delete(hunterIOFilters);
 
   return {
     success: true,
-    deletedCombinationItems: combinationItemsCount,
-    deletedCombinations: combinationsCount,
-    totalDeleted: totalDeleted,
+    deletedFilters: filtersCount,
+    totalDeleted: filtersCount,
   };
 }
 
-export default deleteCombinations;
+export default deleteHunterIOFilters;

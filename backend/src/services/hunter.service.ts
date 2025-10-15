@@ -228,3 +228,104 @@ module.exports = { hunterRequest, hunterRequestZombie };
 
 // Default export for ES modules
 export default { hunterRequest };
+
+/* Types for a “domain search” response matching the provided JSON */
+
+export interface DomainSearchResponse {
+  data: DomainData;
+  meta: Meta;
+}
+
+export interface DomainData {
+  domain: string;
+  disposable: boolean;
+  webmail: boolean;
+  accept_all: boolean;
+  /** Example: "{first}" or "{first}.{last}" */
+  pattern: string | null;
+  organization: string | null;
+  linked_domains: string[];
+  emails: Email[];
+}
+
+export type EmailType = "personal" | "generic" | "role" | (string & {});
+
+export type Seniority = "junior" | "senior" | "executive" | "manager" | "intern" | "unknown" | (string & {});
+
+export type Department =
+  | "it"
+  | "engineering"
+  | "communication"
+  | "executive"
+  | "finance"
+  | "hr"
+  | "legal"
+  | "management"
+  | "marketing"
+  | "sales"
+  | "support"
+  | "operations"
+  | "other"
+  | (string & {});
+
+export type VerificationStatus =
+  | "valid"
+  | "accept_all"
+  | "invalid"
+  | "webmail"
+  | "disposable"
+  | "risky"
+  | (string & {});
+
+export interface Email {
+  /** Full email address */
+  value: string;
+  type: EmailType;
+  /** Confidence score 0–100 */
+  confidence: number;
+  sources: EmailSource[];
+  first_name: string | null;
+  last_name: string | null;
+  position: string | null;
+  /** Unprocessed title as found */
+  position_raw: string | null;
+  seniority: Seniority | null;
+  department: Department | null;
+  linkedin: string | null;
+  twitter: string | null;
+  phone_number: string | null;
+  verification: Verification | null;
+}
+
+export interface EmailSource {
+  /** Source domain (e.g., "github.com") */
+  domain: string;
+  /** Absolute or canonicalized URL */
+  uri: string;
+  /** YYYY-MM-DD */
+  extracted_on: string | null;
+  /** YYYY-MM-DD */
+  last_seen_on: string | null;
+  still_on_page: boolean;
+}
+
+export interface Verification {
+  /** YYYY-MM-DD */
+  date: string | null;
+  status: VerificationStatus;
+}
+
+export interface Meta {
+  results: number;
+  limit: number;
+  offset: number;
+  params: MetaParams;
+}
+
+export interface MetaParams {
+  domain: string | null;
+  company: string | null;
+  type: "" | null;
+  seniority: "" | null;
+  department: "" | null;
+}
