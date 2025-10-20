@@ -26,7 +26,7 @@
   });
 
   function connectSocket() {
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     console.log("SocketTester: Attempting to connect to:", backendUrl);
 
@@ -227,6 +227,6 @@
   <!-- Connection Info -->
   <div class="mt-4 text-xs text-gray-500 border-t pt-3">
     <p>Socket ID: {socketId || "Not connected"}</p>
-    <p>Backend URL: {import.meta.env.VITE_BACKEND_URL || "http://localhost:4000"}</p>
+    <p>Backend URL: {import.meta.env.VITE_BACKEND_URL}</p>
   </div>
 </div>

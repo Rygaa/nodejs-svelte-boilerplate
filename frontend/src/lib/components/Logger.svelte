@@ -33,8 +33,8 @@
 
   const logLevels = ["DEBUG", "INFO", "PROCESS", "API", "DATA", "SUCCESS", "WARNING", "ERROR"];
 
-  // Get backend URL from environment or default
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+  // Get backend URL from environment
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   onMount(() => {
     // Initialize with "All" tab

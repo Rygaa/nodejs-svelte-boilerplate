@@ -7,7 +7,7 @@ extendAsyncArrayPrototypes();
 // Load environment variables
 dotenv.config();
 
-const PORT = Number(process.env.PORT) || 4000;
+const PORT = Number(process.env.PORT);
 
 // Create and export the singleton instance
 export const serverManager = ServerManager.getInstance();

@@ -12,8 +12,8 @@ export class HTTPService {
   private app: Application;
   private appRouter: any; // Will be set when router is imported
 
-  // JWT Secret - in production, use environment variable
-  private readonly JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+  // JWT Secret - from environment variable
+  private readonly JWT_SECRET = process.env.JWT_SECRET;
 
   // Create tRPC context type
   private readonly Context = {} as {
@@ -61,6 +61,12 @@ export class HTTPService {
     try {
       // Import jwt dynamically to avoid issues when shared package is used on frontend
       const jwt = await import("jsonwebtoken");
+      if (!this.JWT_SECRET) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "JWT_SECRET environment variable is required",
+        });
+      }
       const decoded = jwt.verify(token, this.JWT_SECRET) as {
         userId: string;
         email: string;
@@ -118,6 +124,9 @@ export class HTTPService {
     return TRPCError;
   }
   public getJWTSecret() {
+    if (!this.JWT_SECRET) {
+      throw new Error("JWT_SECRET environment variable is required");
+    }
     return this.JWT_SECRET;
   }
 

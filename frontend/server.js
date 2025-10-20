@@ -14,7 +14,7 @@ dotenv.config({ path: path.join(__dirname, ".env") });
 dotenv.config({ path: path.join(__dirname, ".env.production"), override: false });
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 
 // Serve static files from dist directory
 const distPath = path.join(__dirname, "dist");

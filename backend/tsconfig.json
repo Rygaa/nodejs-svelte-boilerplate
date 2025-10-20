@@ -29,7 +29,5 @@
     "prisma",
     "src/oldRestful/**/*"
   ],
-  "references": [
-    { "path": "../shared" }
-  ]
+  "references": []
 }

@@ -16,13 +16,12 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "shared": ["../shared/src"],
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@backend/*": ["../backend/src/*"]
     }
   },
-  "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.svelte", "../shared/src"],
+  "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.svelte", "../backend/src/trpc/router.ts"],
   "references": [
-    { "path": "./tsconfig.node.json" },
-    { "path": "../shared" }
+    { "path": "./tsconfig.node.json" }
   ]
 }

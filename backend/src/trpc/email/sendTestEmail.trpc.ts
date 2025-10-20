@@ -7,10 +7,13 @@ import { eq } from "drizzle-orm";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
 
-const ENCRYPTION_KEY = process.env.EMAIL_ENCRYPTION_KEY || "your-32-character-encryption-key!";
+const ENCRYPTION_KEY = process.env.EMAIL_ENCRYPTION_KEY;
 const ALGORITHM = "aes-256-cbc";
 
 function decrypt(encryptedText: string): string {
+  if (!ENCRYPTION_KEY) {
+    throw new Error("EMAIL_ENCRYPTION_KEY environment variable is required");
+  }
   const textParts = encryptedText.split(":");
   const iv = Buffer.from(textParts.shift()!, "hex");
   const encrypted = textParts.join(":");

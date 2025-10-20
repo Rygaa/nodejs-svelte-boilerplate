@@ -139,11 +139,15 @@ export async function hunterRequest(
   opts: { method?: string; body?: any } = {}
 ): Promise<any> {
   const { method = "GET", body = null } = opts;
+  const apiKey = process.env.HUNTER_API_KEY;
+  if (!apiKey) {
+    throw new Error("HUNTER_API_KEY environment variable is required");
+  }
   const url = new URL(`https://api.hunter.io${pathname}`);
-  url.searchParams.set("api_key", process.env.HUNTER_API_KEY || "");
+  url.searchParams.set("api_key", apiKey);
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    "X-API-KEY": process.env.HUNTER_API_KEY || "",
+    "X-API-KEY": apiKey,
   };
   const res = await fetch(url.toString(), {
     method,
@@ -185,8 +189,12 @@ export async function hunterRequestZombie(
   opts: { method?: string; body?: any } = {}
 ): Promise<any> {
   const { method = "GET", body = null } = opts;
+  const apiKey = process.env.HUNTER_API_KEY;
+  if (!apiKey) {
+    throw new Error("HUNTER_API_KEY environment variable is required");
+  }
   const url = new URL(`https://api.hunter.io${pathname}`);
-  url.searchParams.set("api_key", process.env.HUNTER_API_KEY || "");
+  url.searchParams.set("api_key", apiKey);
 
   try {
     const zombie = axiosZombie();
@@ -196,7 +204,7 @@ export async function hunterRequestZombie(
       url: url.toString(),
       headers: {
         "Content-Type": "application/json",
-        "X-API-KEY": process.env.HUNTER_API_KEY || "",
+        "X-API-KEY": apiKey,
       },
     };
 

@@ -6,10 +6,13 @@ import { protonMailConfigs } from "../../db/schema";
 import { eq } from "drizzle-orm";
 import crypto from "crypto";
 
-const ENCRYPTION_KEY = process.env.EMAIL_ENCRYPTION_KEY || "your-32-character-encryption-key!";
+const ENCRYPTION_KEY = process.env.EMAIL_ENCRYPTION_KEY;
 const ALGORITHM = "aes-256-cbc";
 
 function encrypt(text: string): string {
+  if (!ENCRYPTION_KEY) {
+    throw new Error("EMAIL_ENCRYPTION_KEY environment variable is required");
+  }
   const iv = crypto.randomBytes(16);
   const key = crypto.scryptSync(ENCRYPTION_KEY, "salt", 32);
   const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
