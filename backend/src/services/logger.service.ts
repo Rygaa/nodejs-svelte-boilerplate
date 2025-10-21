@@ -2,12 +2,16 @@
  * Real-time logging service that broadcasts messages to connected clients
  */
 
+import { existsSync, mkdirSync, writeFileSync, appendFileSync } from "fs";
+import { join } from "path";
+import { emitLog } from "../trpc/ws.router";
+
 let ioInstance: any = null;
 
 /**
- * Initialize the logger with Socket.IO instance
+ * Initialize the logger with optional Socket.IO instance
  */
-function initLogger(io: any): void {
+function initLogger(io?: any): void {
   ioInstance = io;
 }
 
@@ -108,10 +112,8 @@ function broadcastLog(level: LogLevel, message: string, data: any = null, source
   if (data) {
   }
 
-  // Broadcast to connected clients
-  if (ioInstance) {
-    ioInstance.emit("discovery-log", logEntry);
-  }
+  // Broadcast to connected clients via tRPC WebSocket
+  emitLog(logEntry);
 }
 
 /**

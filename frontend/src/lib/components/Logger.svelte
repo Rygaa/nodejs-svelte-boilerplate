@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
-  import { io, type Socket } from "socket.io-client";
+  import { trpc } from "../../config/trpc";
   import Button from "./Button.svelte";
 
   interface LogEntry {
@@ -24,7 +24,7 @@
   let isVisible = false;
   let logTabs: LogTab[] = [];
   let activeTabId = "all";
-  let socket: Socket | null = null;
+  let logSubscription: any = null;
   let autoScroll = true;
   let logContainer: HTMLElement;
   let logLevel = "INFO"; // Filter level
@@ -32,9 +32,6 @@
   let isUserScrolledUp = false; // Track if user manually scrolled up
 
   const logLevels = ["DEBUG", "INFO", "PROCESS", "API", "DATA", "SUCCESS", "WARNING", "ERROR"];
-
-  // Get backend URL from environment
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   onMount(() => {
     // Initialize with "All" tab
@@ -47,26 +44,26 @@
       },
     ];
 
-    // Connect to Socket.IO server
-    socket = io(backendUrl, {
-      withCredentials: true,
-    });
-
-    socket.on("connect", () => {
+    // Connect to tRPC WebSocket subscription for logs
+    try {
+      addLocalLog("INFO", "Connecting to real-time console...", null);
+      
+      logSubscription = trpc.ws.onLogs.subscribe(
+        { level: logLevel },
+        {
+          onData: (logEntry: LogEntry) => {
+            addLog(logEntry);
+          },
+          onError: (error) => {
+            addLocalLog("ERROR", "Real-time console error", error.message);
+          },
+        }
+      );
+      
       addLocalLog("SUCCESS", "Connected to real-time console", null);
-    });
-
-    socket.on("disconnect", () => {
-      addLocalLog("WARNING", "Disconnected from real-time console", null);
-    });
-
-    socket.on("discovery-log", (logEntry: LogEntry) => {
-      addLog(logEntry);
-    });
-
-    socket.on("connect_error", (error) => {
+    } catch (error) {
       addLocalLog("ERROR", "Failed to connect to real-time console", error.message);
-    });
+    }
 
     // Listen for keyboard shortcuts
     const handleKeyboard = (event: KeyboardEvent) => {
@@ -89,8 +86,8 @@
   });
 
   onDestroy(() => {
-    if (socket) {
-      socket.disconnect();
+    if (logSubscription) {
+      logSubscription.unsubscribe();
     }
   });
 

@@ -9,7 +9,7 @@
   // Import page components
   import MyAccount from "./MyAccount.svelte";
   import RealTimeConsole from "../lib/components/Logger.svelte";
-  import SocketTester from "../lib/components/SocketTester.svelte";
+  import TRPCWebSocketTester from "../lib/components/TRPCWebSocketTester.svelte";
   import Scripts from "./Scripts.svelte";
   import Companies from "./Companies/Companies.svelte";
   import Context from "./Context.svelte";
@@ -18,7 +18,7 @@
 
   let user: any = null;
   let isLoading = true;
-  let showSocketTester = false; // Changed to true for always visible
+  let showWebSocketTester = false; // Changed to true for always visible
 
   // Define dashboard routes
   const dashboardRoutes = {
@@ -74,14 +74,14 @@
   <!-- Real-time Console (always available) -->
   <RealTimeConsole />
 
-  <!-- Socket Tester Toggle Button -->
+  <!-- WebSocket Tester Toggle Button -->
   <button
-    on:click={() => (showSocketTester = !showSocketTester)}
+    on:click={() => (showWebSocketTester = !showWebSocketTester)}
     class="fixed bottom-4 right-20 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg z-50 transition-colors"
-    title={showSocketTester ? "Hide Socket Tester" : "Show Socket Tester"}
+    title={showWebSocketTester ? "Hide WebSocket Tester" : "Show WebSocket Tester"}
   >
     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      {#if showSocketTester}
+      {#if showWebSocketTester}
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
       {:else}
         <path
@@ -94,10 +94,10 @@
     </svg>
   </button>
 
-  <!-- Socket Communication Tester -->
-  {#if showSocketTester}
+  <!-- WebSocket Communication Tester -->
+  {#if showWebSocketTester}
     <div class="fixed bottom-20 right-4 w-full max-w-md lg:w-1/3 lg:max-w-lg z-40 p-4 lg:p-0">
-      <SocketTester />
+      <TRPCWebSocketTester />
     </div>
   {/if}
 {/if}

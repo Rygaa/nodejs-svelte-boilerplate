@@ -9,7 +9,7 @@ index.ts (entry point)
     ↓
 ServerManager
     ├── HTTPService (Express.js routes & middleware)
-    └── SocketService (Socket.IO connections & events)
+    └── TRPCWebSocketService (tRPC WebSocket subscriptions)
 ```
 
 ## Services
@@ -33,15 +33,15 @@ ServerManager
   - Middleware configuration
   - Error handling
 
-### 3. SocketService (`src/services/socket.service.ts`)
+### 3. TRPCWebSocketService (`src/services/trpc-ws.service.ts`)
 
-- **Purpose**: Manages all WebSocket connections and events
+- **Purpose**: Manages WebSocket connections using tRPC subscriptions
 - **Responsibilities**:
-  - Socket.IO server configuration
+  - tRPC WebSocket server configuration
   - Connection/disconnection handling
-  - Custom event management
-  - Broadcasting capabilities
-  - Connection pooling
+  - Type-safe subscription management
+  - Real-time event broadcasting
+  - Client connection tracking
 
 ## Optional: Custom Socket Handlers
 
@@ -76,13 +76,15 @@ httpService.addRoute("/api/custom", customRouter);
 
 ```typescript
 const serverManager = new ServerManager();
-const socketService = serverManager.getSocketService();
+const wsService = serverManager.getWebSocketService();
 
-// Broadcast to all clients
-socketService.broadcastToAll("update", { message: "Server update" });
+// Broadcast to all connected WebSocket clients
+wsService.broadcastToAll({ message: "Server update" });
 
-// Broadcast to specific room
-socketService.broadcastToRoom("room1", "notification", { text: "New message" });
+// Send events via tRPC WebSocket subscriptions
+import { emitNotification, emitLog } from "./src/trpc/ws.router";
+emitNotification("New message", "info", "user123");
+emitLog({ level: "INFO", message: "Something happened" });
 ```
 
 ### Using Custom Socket Handlers

@@ -1,10 +1,10 @@
 /**
- * Server Manager - Orchestrates HTTP and Socket.IO services
+ * Server Manager - Orchestrates HTTP and tRPC WebSocket services
  */
 
 import { createServer } from "http";
 import { HTTPService } from "./http.service";
-import { SocketService } from "./socket.service";
+import { TRPCWebSocketService } from "./trpc-ws.service";
 import { initLogger, logger } from "./logger.service";
 
 export type Context = {
@@ -20,7 +20,7 @@ export type Context = {
 export class ServerManager {
   private static instance: ServerManager;
   private httpService: HTTPService;
-  private socketService: SocketService;
+  private wsService: TRPCWebSocketService;
   private server: any;
   private allowedOrigins: string[];
 
@@ -28,10 +28,10 @@ export class ServerManager {
     this.allowedOrigins = this.getAllowedOrigins();
     this.httpService = new HTTPService(this.allowedOrigins);
     this.server = createServer(this.httpService.getApp());
-    this.socketService = new SocketService(this.server, this.allowedOrigins);
+    this.wsService = new TRPCWebSocketService(this.server);
 
-    // Initialize logger with socket instance
-    initLogger(this.socketService.getIO());
+    // Initialize logger (no longer needs socket instance for basic logging)
+    initLogger();
   }
 
   public static getInstance(): ServerManager {
@@ -45,6 +45,7 @@ export class ServerManager {
     // Import and set the router after tRPC exports are available
     const { appRouter } = require("../trpc/router");
     this.httpService.setRouter(appRouter);
+    this.wsService.setupWithRouter(appRouter);
   }
 
   private getAllowedOrigins(): string[] {
@@ -103,11 +104,11 @@ export class ServerManager {
 
       this.server.listen(port, () => {
         logger.success({
-          message: `Server started successfully on port ${port} with real-time logging`,
+          message: `Server started successfully on port ${port} with tRPC WebSocket support`,
           data: {
             port,
             allowedOrigins: this.allowedOrigins,
-            connectedClients: this.socketService.getConnectedClientsCount(),
+            connectedClients: this.wsService.getConnectedClientsCount(),
           },
           source: "server.service.ts",
         });
@@ -122,8 +123,8 @@ export class ServerManager {
     }
   }
 
-  public getSocketService(): SocketService {
-    return this.socketService;
+  public getWebSocketService(): TRPCWebSocketService {
+    return this.wsService;
   }
 
   public getHTTPService(): HTTPService {

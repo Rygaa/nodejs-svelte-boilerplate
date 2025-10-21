@@ -1,4 +1,5 @@
 import { router, ping } from "../index";
+import { wsRouter } from "./ws.router";
 import { login } from "../trpc/user/login.trpc";
 import { signup } from "../trpc/user/signup.trpc";
 import { me } from "../trpc/user/me.trpc";
@@ -92,6 +93,7 @@ export const appRouter = router({
     sendToUser,
     getPushStatus,
   }),
+  ws: wsRouter,
 });
 
 export type AppRouter = typeof appRouter;
