@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Lock files (using pnpm)
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+
+# Storage folder contents (but keep the folder itself)
+backend/storage/*
+!backend/storage/.gitkeep
+
+# IDE/Editor files
+.copilot/

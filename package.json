@@ -1,0 +1,23 @@
+{
+  "name": "residanat",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Residanat project with backend and frontend",
+  "scripts": {
+    "dev": "pnpm --parallel -r dev",
+    "dev:backend": "pnpm --filter backend dev",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "build": "pnpm -r build",
+    "build:backend": "pnpm --filter backend build",
+    "build:frontend": "pnpm --filter frontend build",
+    "install:all": "pnpm install -r",
+    "clean": "pnpm -r exec rm -rf node_modules dist && rm -rf node_modules",
+    "db:generate": "pnpm --filter backend db:generate",
+    "db:migrate": "pnpm --filter backend db:migrate",
+    "db:push": "pnpm --filter backend db:push",
+    "db:studio": "pnpm --filter backend db:studio"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
